@@ -1,0 +1,502 @@
+                   
+/*************************************************************************/
+/********************************** Register File ************************/
+/*************************************************************************/
+
+module reg_file (rr1,rr2,wr,wd,regwrite,rd1,rd2,clock);
+   input [1:0] rr1,rr2,wr;
+   input [15:0] wd;
+   input regwrite,clock;
+   output [15:0] rd1,rd2;
+   wire [15:0] q1,q2,q3;
+   
+// registers 
+   instr_reg r1 (wd,c1,q1);
+   instr_reg r2 (wd,c2,q2);
+   instr_reg r3 (wd,c3,q3);
+   
+// output port
+mux4x1 
+    muxA0 (0,q1[0],q2[0],q3[0],rr1,rd1[0]),
+    muxA1 (0,q1[1],q2[1],q3[1],rr1,rd1[1]),
+    muxA2 (0,q1[2],q2[2],q3[2],rr1,rd1[2]),
+    muxA3 (0,q1[3],q2[3],q3[3],rr1,rd1[3]),
+    muxA4 (0,q1[4],q2[4],q3[4],rr1,rd1[4]),
+    muxA5 (0,q1[5],q2[5],q3[5],rr1,rd1[5]),
+    muxA6 (0,q1[6],q2[6],q3[6],rr1,rd1[6]),
+    muxA7 (0,q1[7],q2[7],q3[7],rr1,rd1[7]),
+    muxA8 (0,q1[8],q2[8],q3[8],rr1,rd1[8]),
+    muxA9 (0,q1[9],q2[9],q3[9],rr1,rd1[9]),
+    muxA10 (0,q1[10],q2[10],q3[10],rr1,rd1[10]),  
+    muxA11 (0,q1[11],q2[11],q3[11],rr1,rd1[11]),
+    muxA12 (0,q1[12],q2[12],q3[12],rr1,rd1[12]),
+    muxA13 (0,q1[13],q2[13],q3[13],rr1,rd1[13]),
+    muxA14 (0,q1[14],q2[14],q3[14],rr1,rd1[14]),
+    muxA15 (0,q1[15],q2[15],q3[15],rr1,rd1[15]),
+	
+    muxB0 (0,q1[0],q2[0],q3[0],rr2,rd2[0]),
+    muxB1 (0,q1[1],q2[1],q3[1],rr2,rd2[1]),
+    muxB2 (0,q1[2],q2[2],q3[2],rr2,rd2[2]),
+    muxB3 (0,q1[3],q2[3],q3[3],rr2,rd2[3]),
+    muxB4 (0,q1[4],q2[4],q3[4],rr2,rd2[4]),
+    muxB5 (0,q1[5],q2[5],q3[5],rr2,rd2[5]),
+    muxB6 (0,q1[6],q2[6],q3[6],rr2,rd2[6]),
+    muxB7 (0,q1[7],q2[7],q3[7],rr2,rd2[7]),
+    muxB8 (0,q1[8],q2[8],q3[8],rr2,rd2[8]),
+    muxB9 (0,q1[9],q2[9],q3[9],rr2,rd2[9]),
+    muxB10 (0,q1[10],q2[10],q3[10],rr2,rd2[10]),
+    muxB11 (0,q1[11],q2[11],q3[11],rr2,rd2[11]),
+    muxB12 (0,q1[12],q2[12],q3[12],rr2,rd2[12]),
+    muxB13 (0,q1[13],q2[13],q3[13],rr2,rd2[13]),
+    muxB14 (0,q1[14],q2[14],q3[14],rr2,rd2[14]),
+    muxB15 (0,q1[15],q2[15],q3[15],rr2,rd2[15]);
+	
+// input port
+   decoder dec (wr[1],wr[0],w3,w2,w1,w0);
+   and a (regwrite_and_clock,regwrite,clock);
+   and a1 (c1,regwrite_and_clock,w1),
+       a2 (c2,regwrite_and_clock,w2),
+       a3 (c3,regwrite_and_clock,w3);
+endmodule
+
+// 16-bit D flip flop for every register
+module instr_reg (Instruction, CLK, IR);
+ input [15:0] Instruction;
+ input CLK;
+ output [15:0] IR;
+ 
+ D_flip_flop flipFlop1(Instruction[0], CLK, IR[0]),
+             flipFlop2(Instruction[1], CLK, IR[1]),
+             flipFlop3(Instruction[2], CLK, IR[2]),
+             flipFlop4(Instruction[3], CLK, IR[3]),
+             flipFlop5(Instruction[4], CLK, IR[4]),
+             flipFlop6(Instruction[5], CLK, IR[5]),
+             flipFlop7(Instruction[6], CLK, IR[6]),
+             flipFlop8(Instruction[7], CLK, IR[7]),
+             flipFlop9(Instruction[8], CLK, IR[8]),
+             flipFlop10(Instruction[9], CLK, IR[9]),
+             flipFlop11(Instruction[10], CLK, IR[10]),
+             flipFlop12(Instruction[11], CLK, IR[11]),
+             flipFlop13(Instruction[12], CLK, IR[12]),
+             flipFlop14(Instruction[13], CLK, IR[13]),
+             flipFlop15(Instruction[14], CLK, IR[14]),
+             flipFlop16(Instruction[15], CLK, IR[15]);
+ endmodule
+ 
+// D flip-flop Components
+module D_flip_flop(D,CLK,Q);
+   input D,CLK;
+   output Q;
+   wire CLK1, Y;
+   not  not1 (CLK1,CLK);
+   D_latch D1(D,CLK, Y),
+           D2(Y,CLK1,Q);
+endmodule
+
+module D_latch(D,C,Q);
+   input D,C;
+   output Q;
+   wire x,y,D1,Q1;
+   nand nand1 (x,D, C),
+        nand2 (y,D1,C),
+        nand3 (Q,x,Q1),
+        nand4 (Q1,y,Q);
+   not  not1  (D1,D);
+endmodule
+
+// Decoder for the registers
+module decoder (S1,S0,D3,D2,D1,D0);
+   input S0,S1;
+   output D0,D1,D2,D3;
+ 
+   not n1 (notS0,S0),
+       n2 (notS1,S1);
+   and a0 (D0,notS1,notS0),
+       a1 (D1,notS1,   S0),
+       a2 (D2,   S1,notS0),
+       a3 (D3,   S1,   S0);
+endmodule
+
+
+/*************************************************************************/
+/**************************************** ALU ****************************/
+/*************************************************************************/
+
+// 16 bit ALU using 16 1-bit ALU's
+module ALU (op,a,b,result,zero);
+   input [15:0] a;
+   input [15:0] b;
+   input [2:0] op;
+   output [15:0] result;
+   output zero;
+	
+   ALU1   alu0  (a[0], b[0], op[2],op[1:0],set,op[2],c1,result[0]);
+   ALU1   alu1  (a[1], b[1], op[2],op[1:0],0,  c1,   c2,result[1]);
+   ALU1   alu2  (a[2], b[2], op[2],op[1:0],0,  c2,   c3,result[2]);
+   ALU1   alu3  (a[3], b[3], op[2],op[1:0],0,  c3,   c4,result[3]);
+   ALU1   alu4  (a[4], b[4], op[2],op[1:0],0,  c4,   c5,result[4]);
+   ALU1   alu5  (a[5], b[5], op[2],op[1:0],0,  c5,   c6,result[5]);
+   ALU1   alu6  (a[6], b[6], op[2],op[1:0],0,  c6,   c7,result[6]);
+   ALU1   alu7  (a[7], b[7], op[2],op[1:0],0,  c7,   c8,result[7]);
+   ALU1   alu8  (a[8], b[8], op[2],op[1:0],0,  c8,   c9,result[8]);
+   ALU1   alu9  (a[9], b[9], op[2],op[1:0],0,  c9,   c10,result[9]);
+   ALU1   alu10 (a[10],b[10],op[2],op[1:0],0,  c10,  c11,result[10]);
+   ALU1   alu11 (a[11],b[11],op[2],op[1:0],0,  c11,  c12,result[11]);
+   ALU1   alu12 (a[12],b[12],op[2],op[1:0],0,  c12,  c13,result[12]);
+   ALU1   alu13 (a[13],b[13],op[2],op[1:0],0,  c13,  c14,result[13]);
+   ALU1   alu14 (a[14],b[14],op[2],op[1:0],0,  c14,  c15,result[14]);
+   ALUmsb alu15 (a[15],b[15],op[2],op[1:0],0,  c15,  c16,result[15],set);
+
+   nor nor1(zero,result[0],result[1],result[2],result[3],result[4],result[5],result[6],result[7],
+                 result[8],result[9],result[10],result[11],result[12],result[13],result[14],result[15]);
+
+endmodule
+
+
+// 1-bit ALU for bits 0-2
+
+module ALU1 (a,b,binvert,op,less,carryin,carryout,result);
+   input a,b,less,carryin,binvert;
+   input [1:0] op;
+   output carryout,result;
+   wire sum, a_and_b, a_or_b, b_inv;
+	
+   not not1(b_inv, b);
+   
+   mux2x1 mux1(b,b_inv,binvert,b1); 
+   and and1(a_and_b, a, b);
+   
+   or or1(a_or_b, a, b);
+   
+   fulladder adder1(sum,carryout,a,b1,carryin);
+   mux4x1 mux2(a_and_b,a_or_b,sum,less,op[1:0],result); 
+
+endmodule
+
+
+// 1-bit ALU for the most significant bit
+
+module ALUmsb (a,b,binvert,op,less,carryin,carryout,result,sum);
+   input a,b,less,carryin,binvert;
+   input [1:0] op;
+   output carryout,result,sum;
+   wire sum, a_and_b, a_or_b, b_inv;
+	
+   not not1(b_inv, b);
+   mux2x1 mux1(b,b_inv,binvert,b1);
+   and and1(a_and_b, a, b);
+   or or1(a_or_b, a, b);
+   fulladder adder1(sum,carryout,a,b1,carryin);
+   mux4x1 mux2(a_and_b,a_or_b,sum,less,op[1:0],result); 
+
+endmodule
+
+// ALU Component
+module halfadder (S,C,x,y); 
+   input x,y; 
+   output S,C; 
+
+   xor (S,x,y); 
+   and (C,x,y); 
+endmodule 
+
+
+module fulladder (S,C,x,y,z); 
+   input x,y,z; 
+   output S,C; 
+   wire S1,D1,D2;
+
+   halfadder HA1 (S1,D1,x,y), 
+             HA2 (S,D2,S1,z); 
+   or g1(C,D2,D1); 
+endmodule 
+
+
+/*************************************************************************/
+/********************************* Multiplexers **************************/
+/*************************************************************************/
+
+// 2x1 multiplexer for the ALU source and the Write Register 
+module mux2x1(A,B,select,OUT); 
+   input A,B,select; 
+   output OUT; 
+   
+   not N1 (notS, select);
+   and A1 (and1, notS, A);
+   and A2 (and2, select, B);
+   or O1 (OUT, and1, and2);
+endmodule 
+
+// 4x1 Multiplexer for the register file
+module mux4x1(i0,i1,i2,i3,select,y);
+ input i0,i1,i2,i3;
+ input [1:0] select;
+ output y; 
+  wire [1:0] invSelect;
+ wire firstAnd, secondAnd, thirdAnd, fourthAnd;
+  
+ not S1 (invSelect[1], select[1]),
+  S2 (invSelect[0], select[0]);
+ 
+ and A1 (firstAnd, i0, invSelect[1], in1vSelect[0]),
+  A2 (secondAnd,i1, invSelect[1], select[0]),
+  A3 (thirdAnd, i2, select[1], invSelect[0]),
+  A4 (fourthAnd, i3, select[1], select[0]);
+  
+ or O1 (y, firstAnd, secondAnd, thirdAnd, fourthAnd);
+endmodule
+
+// Register's Multiplexer
+module RegDstMux(i0,i1,select,OUT);
+   input [1:0] i0,i1;
+   input select;
+   output [1:0] OUT;
+   
+   mux2x1 out1 (i0[0],i1[0],select,OUT[0]);
+   mux2x1 out2 (i0[1],i1[1],select,OUT[1]);
+endmodule
+
+// 16-bit Multiplexer for the ALUSrc, MemToReg, and Branch
+module Mux16Bit(i0,i1,select,OUT);
+   input [15:0] i0,i1;
+   input select;
+   output [15:0] OUT;
+   
+   mux2x1 out1  (i0[0],i1[0],select,OUT[0]);
+   mux2x1 out2  (i0[1],i1[1],select,OUT[1]);
+   mux2x1 out3  (i0[2],i1[2],select,OUT[2]);
+   mux2x1 out4  (i0[3],i1[3],select,OUT[3]);
+   mux2x1 out5  (i0[4],i1[4],select,OUT[4]);
+   mux2x1 out6  (i0[5],i1[5],select,OUT[5]);
+   mux2x1 out7  (i0[6],i1[6],select,OUT[6]);
+   mux2x1 out8  (i0[7],i1[7],select,OUT[7]);
+   mux2x1 out9  (i0[8],i1[8],select,OUT[8]);
+   mux2x1 out10 (i0[9],i1[9],select,OUT[9]);
+   mux2x1 out11 (i0[10],i1[10],select,OUT[10]);
+   mux2x1 out12 (i0[11],i1[11],select,OUT[11]);
+   mux2x1 out13 (i0[12],i1[12],select,OUT[12]);
+   mux2x1 out14 (i0[13],i1[13],select,OUT[13]);
+   mux2x1 out15 (i0[14],i1[14],select,OUT[14]);
+   mux2x1 out16 (i0[15],i1[15],select,OUT[15]);
+endmodule
+
+module BranchControl (beq, bne, zero, out);
+  input beq, bne, zero;
+  output out;
+  
+  not n1 (notZero, zero);
+  and a1 (a, bne, zero);
+  and a2 (b, beq, notZero);
+  or o1 (out, a, b);
+endmodule
+
+
+/*************************************************************************/
+/**************** Control Unit *******************************************/
+/*************************************************************************/
+
+//Control Unit to control the instruction input
+module MainControl (Op,Control); 
+
+  input [3:0] Op;
+  output reg [9:0] Control;
+
+  always @(Op) case (Op)
+    4'b0000: Control <= 10'b1001000010; // add
+    4'b0001: Control <= 10'b1001000110; // subtract
+    4'b0010: Control <= 10'b1001000000; // and
+    4'b0011: Control <= 10'b1001000001; // or
+    4'b0111: Control <= 10'b1001000111; // SLT
+    4'b0101: Control <= 10'b0111000010; // LW
+    4'b0110: Control <= 10'b0100100010; // SW 
+    4'b1000: Control <= 10'b0000010110; // BEQ 
+    4'b1001: Control <= 10'b0000001110; // BNE
+    4'b0100: Control <= 10'b0101000010; // ADDI
+  endcase
+
+endmodule
+
+
+/****** 16-bit CPU ****************/
+module CPU (clock,PC,IFID_IR,IDEX_IR,EXMEM_IR,MEMWB_IR,WD);
+
+  input clock;
+  output [15:0] PC,IFID_IR,IDEX_IR,EXMEM_IR,MEMWB_IR,WD;
+
+// Test Program: Adds the first five words in memory
+  initial begin 
+    /**IMemory[0] = 16'b0100000100000000;  // addi $1, $0, 0     Initialize counter
+	IMemory[1] = 16'b0000000000000000;  // nop
+	IMemory[2] = 16'b0000000000000000;  // nop
+	IMemory[3] = 16'b0000000000000000;  // nop
+	IMemory[4] = 16'b0101011000000000;  // lw $2, (0)$1       Load first word
+	                                    //                    Loop:
+	IMemory[5] = 16'b0100010100000010;  // addi $1, $1, 2     counter += 2
+	IMemory[6] = 16'b0000000000000000;  // nop
+	IMemory[7] = 16'b0000000000000000;  // nop
+	IMemory[8] = 16'b0000000000000000;  // nop
+	IMemory[9] = 16'b0101011100000000;  // lw $3, (0)$1       Load next word
+	IMemory[10] = 16'b0000000000000000;  // nop
+	IMemory[11] = 16'b0000000000000000;  // nop
+	IMemory[12] = 16'b0000000000000000;  // nop
+	IMemory[13] = 16'b0000101110000000;  // add $2, $2, $3    Add next word to total
+	IMemory[14] = 16'b0000000000000000;  // nop
+	IMemory[15] = 16'b0000000000000000;  // nop
+	IMemory[16] = 16'b0000000000000000;  // nop
+	IMemory[17] = 16'b0101001100001010;  // lw $3, (10)$0     Load branch ending condition
+	IMemory[18] = 16'b0000000000000000;  // nop
+	IMemory[19] = 16'b0000000000000000;  // nop
+	IMemory[20] = 16'b0000000000000000;  // nop
+	//IMemory[21] = 16'b1001011111101111;  // bne $1, $3, -17   go to Loop if counter < 8
+	IMemory[21] = 16'b1000011111101111;  // beq $1, $3, -17   go to Loop if counter < 8
+	IMemory[22] = 16'b0000000000000000;  // nop
+	IMemory[23] = 16'b0000000000000000;  // nop
+	IMemory[24] = 16'b0000000000000000;  // nop*/
+	
+	// Program without nops
+	IMemory[0] = 16'b0100000100000000;  // addi $1, $0, 0
+	IMemory[1] = 16'b0101011000000000;  // lw $2, (0)$1
+	IMemory[2] = 16'b0100010100000010;  // addi $1, $1, 2
+	IMemory[3] = 16'b0101011100000000;  // lw $3, (0)$1
+	IMemory[4] = 16'b0000101110000000;  // add $2, $2, $3
+	IMemory[5] = 16'b0101001100001010;  // lw $3, (10)$0
+	//IMemory[6] = 16'b1001011111111100;  // bne $1, $3, -4
+	IMemory[6] = 16'b1000011111111100;  // beq $1, $3, -4
+
+	// Data
+    DMemory [0] = 16'h5;
+    DMemory [1] = 16'h7;
+	DMemory [2] = 16'ha;
+	DMemory [3] = 16'h2;
+	DMemory [4] = 16'h4;
+	DMemory [5] = 16'h8;  // branch ending condition
+  end
+  
+  // Pipeline stages
+
+  // IF
+  wire [15:0] NextPC, PCplus2;
+  reg[15:0] PC, IMemory[0:1023], IFID_IR, IFID_PCplus2;
+  ALU fetch (3'b010,PC,2,PCplus2,Unused);
+  Mux16Bit BranchMux1 (PCplus2, EXMEM_Target, BranchOut, NextPC);
+
+  // ID
+  reg [15:0] IDEX_IR; // For monitoring the pipeline
+  wire [9:0] Control;
+  reg IDEX_RegWrite,IDEX_MemtoReg,
+      IDEX_MemWrite,IDEX_ALUSrc,
+	  IDEX_RegDst;
+  reg [1:0] IDEX_Branch;
+  reg [2:0]  IDEX_ALUOp;
+  wire [15:0] RD1,RD2,SignExtend,WD;
+  reg [15:0] IDEX_PCplus2,IDEX_RD1,IDEX_RD2,IDEX_SignExt,IDEXE_IR;
+  reg [1:0]  IDEX_rt,IDEX_rd;
+  reg_file rf (IFID_IR[11:10],IFID_IR[9:8],MEMWB_rd,WD,MEMWB_RegWrite,RD1,RD2,clock);
+  MainControl MainCtrl (IFID_IR[15:12],Control); 
+  assign SignExtend = {{8{IFID_IR[7]}},IFID_IR[7:0]}; // sign extension unit
+
+  // EXE
+  reg EXMEM_RegWrite,EXMEM_MemtoReg,
+      EXMEM_MemWrite;
+  reg [1:0] EXMEM_Branch;
+  wire [15:0] Target;
+  reg EXMEM_Zero;
+  reg [15:0] EXMEM_Target,EXMEM_ALUOut,EXMEM_RD2;
+  reg [15:0] EXMEM_IR; // For monitoring the pipeline
+  reg [1:0] EXMEM_rd;
+  wire [15:0] B,ALUOut;
+  wire [1:0] WR;
+  ALU branch (3'b010,IDEX_SignExt<<1,IDEX_PCplus2,Target,Unused2);
+  ALU ex (IDEX_ALUOp, IDEX_RD1, B, ALUOut, Zero);
+  Mux16Bit ALUSrcMux1 (IDEX_RD2, IDEX_SignExt, IDEX_ALUSrc, B);
+  RegDstMux RegDstMux1 (IDEX_rt, IDEX_rd, IDEX_RegDst, WR);
+  
+  // MEM
+   reg MEMWB_RegWrite,MEMWB_MemtoReg;
+   reg [15:0] DMemory[0:1023],MEMWB_MemOut,MEMWB_ALUOut;
+   reg [15:0] MEMWB_IR; // For monitoring the pipeline
+   wire [15:0] MemOut;
+   reg [1:0] MEMWB_rd;
+   BranchControl BranchCtl (EXMEM_Branch[0], EXMEM_Branch[1], EXMEM_Zero, BranchOut);
+   assign MemOut = DMemory[EXMEM_ALUOut>>1];
+   always @(negedge clock) if (EXMEM_MemWrite) DMemory[EXMEM_ALUOut>>1] <= EXMEM_RD2;
+  
+// WB
+   Mux16Bit MemtoReg (MEMWB_ALUOut, MEMWB_MemOut, MEMWB_MemtoReg, WD);
+
+  initial begin
+    PC = 0;
+// Initialize pipeline registers
+    IDEX_RegWrite=0;IDEX_MemtoReg=0;IDEX_Branch=0;IDEX_MemWrite=0;IDEX_ALUSrc=0;IDEX_RegDst=0;IDEX_ALUOp=0;
+    IFID_IR=0;
+    EXMEM_RegWrite=0;EXMEM_MemtoReg=0;EXMEM_Branch=0;EXMEM_MemWrite=0;
+    EXMEM_Target=0;
+    MEMWB_RegWrite=0;MEMWB_MemtoReg=0;
+   end
+
+// Running the pipeline
+
+   always @(negedge clock) begin 
+
+// IF
+    PC <= NextPC;
+    IFID_PCplus2 <= PCplus2;
+    IFID_IR <= IMemory[PC>>1];
+
+// ID
+    IDEX_IR <= IFID_IR; // For monitoring the pipeline
+    {IDEX_RegDst,IDEX_ALUSrc,IDEX_MemtoReg,IDEX_RegWrite,IDEX_MemWrite,IDEX_Branch,IDEX_ALUOp} <= Control;   
+    IDEX_PCplus2 <= IFID_PCplus2;
+    IDEX_RD1 <= RD1; 
+    IDEX_RD2 <= RD2;
+    IDEX_SignExt <= SignExtend;
+    IDEX_rt <= IFID_IR[9:8];
+    IDEX_rd <= IFID_IR[7:6];
+
+// EXE
+    EXMEM_IR <= IDEX_IR; // For monitoring the pipeline
+    EXMEM_RegWrite <= IDEX_RegWrite;
+    EXMEM_MemtoReg <= IDEX_MemtoReg;
+    EXMEM_Branch   <= IDEX_Branch;
+    EXMEM_MemWrite <= IDEX_MemWrite;
+    EXMEM_Target <= Target;
+    EXMEM_Zero <= Zero;
+    EXMEM_ALUOut <= ALUOut;
+    EXMEM_RD2 <= IDEX_RD2;
+    EXMEM_rd <= WR;
+
+// MEM
+    MEMWB_IR <= EXMEM_IR; // For monitoring the pipeline
+    MEMWB_RegWrite <= EXMEM_RegWrite;
+    MEMWB_MemtoReg <= EXMEM_MemtoReg;
+    MEMWB_MemOut <= MemOut;
+    MEMWB_ALUOut <= EXMEM_ALUOut;
+    MEMWB_rd <= EXMEM_rd;
+
+// WB
+// Register write happens on neg edge of the clock (if MEMWB_RegWrite is asserted)
+
+  end
+
+endmodule
+
+
+// Test module
+
+module test ();
+
+  reg clock;
+  wire [15:0] PC,IFID_IR,IDEX_IR,EXMEM_IR,MEMWB_IR,WD;
+
+  CPU test_cpu(clock,PC,IFID_IR,IDEX_IR,EXMEM_IR,MEMWB_IR,WD);
+
+  always #1 clock = ~clock;
+  
+  initial begin
+    $display ("time PC  IFID_IR  IDEX_IR  EXMEM_IR MEMWB_IR     WD");
+    $monitor ("%2d  %3d  %h     %h     %h     %h     %d", $time,PC,IFID_IR,IDEX_IR,EXMEM_IR,MEMWB_IR,WD);
+    clock = 1;
+    #175 $finish;
+  end
+
+endmodule
